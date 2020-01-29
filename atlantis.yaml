@@ -1,0 +1,11 @@
+version: 3
+automerge: false
+projects:
+- name: Mercury.PreProd
+  dir: .
+  workspace: default
+  terraform_version: v0.11.0
+  autoplan:
+    when_modified: ["**/infrastructure"]
+    enabled: true
+  apply_requirements: [mergeable]
