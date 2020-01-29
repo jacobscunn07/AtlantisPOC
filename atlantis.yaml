@@ -6,6 +6,6 @@ projects:
   workspace: default
   terraform_version: v0.11.0
   autoplan:
-    when_modified: ["**/infrastructure"]
+    when_modified: ["**/infrastructure/"]
     enabled: true
   apply_requirements: [mergeable]
