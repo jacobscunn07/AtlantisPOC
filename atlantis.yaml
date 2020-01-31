@@ -1,7 +1,7 @@
 version: 3
 automerge: false
 projects:
-- name: Mercury.PreProd
+- name: AtlantisPOC
   dir: .
   workspace: default
   terraform_version: v0.11.0
