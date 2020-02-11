@@ -11,7 +11,7 @@ data:
   repos.yml: |
     repos:
       - id: github.com/jacobscunn07/AtlantisPOC
-        apply_requirements: [mergeable]
+        apply_requirements: [mergeable, approved]
         workflow: terragrunt
     workflows:
       terragrunt:
