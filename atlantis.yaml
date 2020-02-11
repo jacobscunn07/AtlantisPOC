@@ -3,7 +3,6 @@ automerge: false
 projects:
 - name: AtlantisPOC
   dir: .
-  workflow: terragrunt
   workspace: default
   terraform_version: v0.11.0
   autoplan:
