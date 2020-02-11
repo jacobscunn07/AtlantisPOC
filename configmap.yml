@@ -17,7 +17,7 @@ data:
       terragrunt:
         plan:
           steps:
-          - run: terragrunt plan -no-color -out $PLANFILE
+          - run: terragrunt plan-all -no-color -out $PLANFILE
         apply:
           steps:
-          - run: terragrunt apply -no-color $PLANFILE
+          - run: terragrunt apply-all -no-color $PLANFILE
