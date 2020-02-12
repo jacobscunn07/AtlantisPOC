@@ -4,14 +4,10 @@ metadata:
   name: atlantis-config
   namespace: default
 data:
-  config.yml: |
-    allow-fork-prs: true
-    atlantis-url: "https://62dc3799.ngrok.io"
-    checkout-strategy: "merge"
   repos.yml: |
     repos:
       - id: github.com/jacobscunn07/AtlantisPOC
-        apply_requirements: [mergeable, approved]
+        apply_requirements: [approved]
         workflow: terragrunt
     workflows:
       terragrunt:
@@ -20,4 +16,4 @@ data:
           - run: terragrunt plan-all -no-color -out $PLANFILE
         apply:
           steps:
-          - run: terragrunt apply-all -no-color $PLANFILE
+          - run: terragrunt apply-all -no-color --terragrunt-non-interactive $PLANFILE
