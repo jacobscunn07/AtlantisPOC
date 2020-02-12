@@ -1,11 +1,14 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: atlantis
-  labels:
-    app: atlantis
 spec:
+  serviceName: atlantis
   replicas: 1
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      partition: 0
   selector:
     matchLabels:
       app: atlantis
@@ -14,9 +17,11 @@ spec:
       labels:
         app: atlantis
     spec:
+      securityContext:
+        fsGroup: 1000 # Atlantis group (1000) read/write access to volumes.
       containers:
       - name: atlantis
-        # image: runatlantis/atlantis:v0.11.1 # 1. Replace <VERSION> with the most recent release.
+        # image: runatlantis/atlantis:v<VERSION> # 1. Replace <VERSION> with the most recent release.
         image: jacobscunn07/atlantis:v0.0.2
         env:
         - name: AWS_ACCESS_KEY_ID
@@ -50,22 +55,21 @@ spec:
             secretKeyRef:
               name: atlantis-vcs
               key: webhook-secret
-        - name: ATLANTIS_ATLANTIS_URL
-          value: "https://62dc3799.ngrok.io"
-        - name: ATLANTIS_ALLOW_FORK_PRS
-          value: "true"
-        - name: ATLANTIS_CHECKOUT_STRATEGY
-          value: "merge"
         ### End GitHub Config ###
 
+        - name: ATLANTIS_DATA_DIR
+          value: /atlantis
         - name: ATLANTIS_PORT
           value: "4141" # Kubernetes sets an ATLANTIS_PORT variable so we need to override.
+        # volumeMounts:
+        # - name: atlantis-data
+        #   mountPath: /atlantis
         ports:
         - name: atlantis
           containerPort: 4141
         args:
         - server
-        - --repo-config=/atlantis/repos.yml
+        - --repo-config=/atlantis-config/repos.yml
         resources:
           requests:
             memory: 256Mi
@@ -90,10 +94,22 @@ spec:
             # If using https, change this to HTTPS
             scheme: HTTP
         volumeMounts:
-        - name: atlantis-config
+        - name: atlantis-data
           mountPath: /atlantis
+        - name: atlantis-config
+          mountPath: /atlantis-config
           readOnly: true
       volumes:
-      - name: atlantis-config
-        configMap:
-          name: atlantis-config
+        - name: atlantis-config
+          configMap:
+            name: atlantis-config
+  volumeClaimTemplates:
+  - metadata:
+      name: atlantis-data
+    spec:
+      accessModes: ["ReadWriteOnce"] # Volume should not be shared by multiple nodes.
+      resources:
+        requests:
+          # The biggest thing Atlantis stores is the Git repo when it checks it out.
+          # It deletes the repo after the pull request is merged.
+          storage: 5Gi
